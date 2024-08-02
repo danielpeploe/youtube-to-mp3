@@ -1,7 +1,8 @@
+const express = require("express");
+const fetch = require("node-fetch");
+
 // packages
-const express = require('express');
-const fetch = require('node-fetch');
-require('dotenv').config();
+require("dotenv").config();
 
 // create express server
 const app = express();
@@ -9,8 +10,8 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // set template engine
-app.set('view engine', 'ejs');
-app.use(express.static('public'));
+app.set("view engine", "ejs");
+app.use(express.static("public"));
 
 app.use(express.urlencoded({ 
     extended: true 
@@ -19,11 +20,44 @@ app.use(express.json());
 
 // routes
 app.get("/", (req, res) => {
-    res.render('index');
+    res.render("index");
 });
 
-app.post("/", (req, res) => {
-    res.send('Hello World');
+app.post("/convert-mp3", async (req, res) => {
+
+    const url = req.body.url;
+
+    if (!url) {
+        return res.render("index", {
+            success: false,
+            message: "Please provide a valid URL"
+        })
+    } else {
+        const fetchAPI = await fetch(`https://youtube-mp36.p.rapidapi.com/dl?id=${url.split("v=")[1].substring(0, 11)}`, {
+            method: "GET",
+            headers: {
+                "x-rapidapi-host": process.env.API_HOST,
+                "x-rapidapi-key": process.env.API_KEY
+            }
+        });
+
+        const response = await fetchAPI.json();
+
+        if (response.status === "ok") {
+            return res.render("index", {
+                success: true, 
+                title: response.title, 
+                download_link: response.link
+            });
+        } else {
+            return res.render("index", {
+                success: false,
+                message: response.message
+            });
+        }
+
+    }
+    
 });
 
 
