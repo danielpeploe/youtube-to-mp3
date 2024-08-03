@@ -69,6 +69,10 @@ app.post("/convert-mp3", async (req, res) => {
     
 });
 
+// handle 404
+app.use((req, res, next) => {
+    res.status(404).render("404");
+});
 
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
