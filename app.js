@@ -25,7 +25,7 @@ app.get("/", (req, res) => {
 
 app.post("/convert-mp3", async (req, res) => {
 
-    const url = req.body.url;
+    let url = req.body.url;
 
     if (!url) {
         return res.render("index", {
@@ -33,7 +33,16 @@ app.post("/convert-mp3", async (req, res) => {
             message: "Please provide a valid URL"
         })
     } else {
-        const fetchAPI = await fetch(`https://youtube-mp36.p.rapidapi.com/dl?id=${url.split("v=")[1].substring(0, 11)}`, {
+        try {
+            url = url.split("v=")[1].substring(0, 11);
+        } catch (error) {
+            return res.render("index", {
+                success: false,
+                message: "Please provide a valid URL"
+            });
+        }
+
+        const fetchAPI = await fetch(`https://youtube-mp36.p.rapidapi.com/dl?id=${url}`, {
             method: "GET",
             headers: {
                 "x-rapidapi-host": process.env.API_HOST,
